@@ -346,6 +346,6 @@ healthchecksdb
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
-MultiShare.Backend/.vs/MultiShare.Backend/v16/.suo
+*.suo
 obj/
 bin/

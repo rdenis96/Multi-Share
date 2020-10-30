@@ -51,6 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Multishare.Backend.CompositionRoot\Multishare.Backend.CompositionRoot.csproj" />
     <ProjectReference Include="..\MultiShare.Backend.DataLayer\MultiShare.Backend.DataLayer.csproj" />
     <ProjectReference Include="..\MultiShare.Backend.Domain\MultiShare.Backend.Domain.csproj" />
     <ProjectReference Include="..\MultiShare.Backend.Helpers\MultiShare.Backend.Helpers.csproj" />

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Multishare.Backend.CompositionRoot;
+using MultiShare.Backend.DataLayer.CompositionRoot;
 using MultiShare.Backend.Domain.Configurations;
 using MultiShare.Backend.Extensions;
 
@@ -20,11 +22,13 @@ namespace MultiShare.Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCustomAuthentication();
+
+            services.AddSingleton<ICompositionRoot, CompositionRootBackend>();
+
             services.Configure<GeneralSettings>(Configuration.GetSection(nameof(GeneralSettings)));
 
             services.AddCustomIdentity();
-
-            services.AddCustomAuthentication();
 
             services.AddMvc();
         }
@@ -46,8 +50,6 @@ namespace MultiShare.Backend
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseCors(x => x.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());
 
             app.UseAuthentication();
 

@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiShare.Backend.Helpers"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiShare.Backend.Migrations", "MultiShare.Backend.Migrations\MultiShare.Backend.Migrations.csproj", "{32E37CF0-2DA5-42C0-AED8-C7E690CE2357}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multishare.Backend.CompositionRoot", "Multishare.Backend.CompositionRoot\Multishare.Backend.CompositionRoot.csproj", "{168DE5C2-55FE-4964-8C4D-19B042D5A084}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Multishare.Backend.CompositionRoot", "Multishare.Backend.CompositionRoot\Multishare.Backend.CompositionRoot.csproj", "{168DE5C2-55FE-4964-8C4D-19B042D5A084}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

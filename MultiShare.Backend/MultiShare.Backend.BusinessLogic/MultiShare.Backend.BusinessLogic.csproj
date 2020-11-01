@@ -6,7 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MultiShare.Backend.Domain\MultiShare.Backend.Domain.csproj" />
+    <ProjectReference Include="..\MultiShare.Backend.Helpers\MultiShare.Backend.Helpers.csproj" />
   </ItemGroup>
 
 </Project>

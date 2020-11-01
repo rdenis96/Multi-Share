@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using MultiShare.Backend.BusinessLogic.Account;
 using MultiShare.Backend.DataLayer.CompositionRoot;
 using MultiShare.Backend.Domain.Account;
+using MultiShare.Backend.Domain.Account.Constants;
 using MultiShare.Backend.Models.Account;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace MultiShare.Backend.Controllers
@@ -28,7 +31,6 @@ namespace MultiShare.Backend.Controllers
 
         // GET: api/<AccountController>
         [HttpGet]
-        [Authorize()]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
@@ -57,10 +59,75 @@ namespace MultiShare.Backend.Controllers
             return BadRequest(result.Errors.FirstOrDefault().Description);
         }
 
-        // PUT api/<AccountController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [AllowAnonymous]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var user = await _userManager.FindByNameAsync(model.Username);
+                    if (user == null)
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        return Unauthorized();
+                    }
+
+                    //var passwordHash = _userManager.PasswordHasher.HashPassword(user, model.Password);
+                    var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, isPersistent: true, lockoutOnFailure: false);
+
+                    if (result.Succeeded)
+                    {
+                        return await SuccessLogin(user);
+                    }
+                    else if (result.IsLockedOut)
+                    {
+                        user.LockoutEnd = new DateTimeOffset(DateTime.Now.AddMinutes(5));
+                        return StatusCode((int)HttpStatusCode.InternalServerError, "User account locked out.");
+                    }
+                    else
+                    {
+                        return StatusCode((int)HttpStatusCode.InternalServerError, "Invalid login attempt.");
+                    }
+                }
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Error while creating token: " + ex.Message);
+            }
+        }
+
+        [Authorize(IdentityPolicies.UserPolicy)]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            if (_signInManager.IsSignedIn(User))
+            {
+                return StatusCode((int)HttpStatusCode.BadRequest, "The account was not signed out! Please try again later!");
+            }
+
+            return Ok("Logged out!");
+        }
+
+        private async Task<IActionResult> SuccessLogin(AppUser user)
+        {
+            var userClaims = await _userManager.GetClaimsAsync(user);
+
+            var userJwtToken = _accountWorker.GenerateJwtToken(user, userClaims);
+            if (string.IsNullOrEmpty(userJwtToken))
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Token couldn't be created! Login failed!");
+            }
+
+            return Ok(new
+            {
+                id = user.Id,
+                username = user.UserName,
+                token = userJwtToken
+            });
         }
     }
 }

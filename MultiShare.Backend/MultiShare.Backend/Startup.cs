@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +11,8 @@ using MultiShare.Backend.DataLayer.CompositionRoot;
 using MultiShare.Backend.Domain.Account.Constants;
 using MultiShare.Backend.Domain.Configurations;
 using MultiShare.Backend.Extensions;
+using Newtonsoft.Json.Serialization;
+using System.Security.Claims;
 
 namespace MultiShare.Backend
 {
@@ -34,10 +38,18 @@ namespace MultiShare.Backend
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(IdentityPolicies.UserPolicy, polBuilder => polBuilder.RequireRole(IdentityRoles.User));
+                options.AddPolicy(IdentityPolicies.User, policy =>
+                {
+                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim(ClaimTypes.Role, IdentityRoles.User);
+                });
             });
 
-            services.AddMvc();
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            });
 
             services.AddSwaggerGen(options =>
             {
@@ -79,6 +91,8 @@ namespace MultiShare.Backend
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            app.UseMiddleware<AuthorizationMiddleware>();
         }
     }
 }

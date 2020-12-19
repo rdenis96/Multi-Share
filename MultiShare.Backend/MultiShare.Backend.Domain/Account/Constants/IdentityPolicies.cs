@@ -2,6 +2,6 @@
 {
     public static class IdentityPolicies
     {
-        public const string UserPolicy = "IsUser";
+        public const string User = "UserPolicy";
     }
 }

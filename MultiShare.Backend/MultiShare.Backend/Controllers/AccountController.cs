@@ -5,9 +5,10 @@ using MultiShare.Backend.BusinessLogic.Account;
 using MultiShare.Backend.DataLayer.CompositionRoot;
 using MultiShare.Backend.Domain.Account;
 using MultiShare.Backend.Domain.Account.Constants;
+using MultiShare.Backend.Helpers.Account;
+using MultiShare.Backend.Helpers.Account.Enums;
 using MultiShare.Backend.Models.Account;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -29,20 +30,6 @@ namespace MultiShare.Backend.Controllers
             _accountWorker = compositionRoot.GetImplementation<AccountWorker>();
         }
 
-        // GET: api/<AccountController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<AccountController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
         [HttpPost("[action]")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel registerViewModel)
         {
@@ -53,7 +40,9 @@ namespace MultiShare.Backend.Controllers
             var result = await _userManager.CreateAsync(user);
             if (result.Succeeded)
             {
-                //await _userManager.AddClaimsAsync(user, AuthorizationHelper.GetRegisterClaims());
+                var claimsToAdd = AuthorizationHelper.GetDefaultClaimsByType(DefaultClaimsType.Registration);
+                await _userManager.AddClaimsAsync(user, claimsToAdd);
+
                 return Ok("Account created!");
             }
             return BadRequest(result.Errors.FirstOrDefault().Description);
@@ -74,7 +63,6 @@ namespace MultiShare.Backend.Controllers
                         return Unauthorized();
                     }
 
-                    //var passwordHash = _userManager.PasswordHasher.HashPassword(user, model.Password);
                     var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, isPersistent: true, lockoutOnFailure: false);
 
                     if (result.Succeeded)
@@ -99,7 +87,7 @@ namespace MultiShare.Backend.Controllers
             }
         }
 
-        [Authorize(IdentityPolicies.UserPolicy)]
+        [Authorize(IdentityPolicies.User)]
         [HttpGet("[action]")]
         public async Task<IActionResult> Logout()
         {
